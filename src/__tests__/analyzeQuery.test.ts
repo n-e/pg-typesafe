@@ -32,7 +32,7 @@ it("analyzes a table-full query", async () => {
         {
           "column": {
             "columnName": "oid",
-            "nullable": true,
+            "nullable": false,
             "schemaName": "pg_catalog",
             "tableName": "pg_type",
           },
@@ -42,7 +42,7 @@ it("analyzes a table-full query", async () => {
         {
           "column": {
             "columnName": "typname",
-            "nullable": false,
+            "nullable": true,
             "schemaName": "pg_catalog",
             "tableName": "pg_type",
           },

@@ -2,7 +2,7 @@ import { Client, ClientBase } from "pg";
 import { Describer } from "./describe";
 import assert from "assert";
 
-interface AnalyzeResult {
+export interface AnalyzeResult {
   parameters: { type_oid: number }[];
   fields: {
     type_oid: number;
@@ -82,7 +82,7 @@ export const analyzeQuery = async (
           schemaName: t_name.table_schema,
           tableName: t_name.table_name,
           columnName: col_name.column_name,
-          nullable: col_constraint !== undefined,
+          nullable: col_constraint === undefined,
         },
       };
     }),

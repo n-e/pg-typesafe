@@ -1,4 +1,4 @@
-import { Connection, Submittable } from "pg";
+import { Connection, type Submittable } from "pg";
 import {
   ParameterDescriptionMessage,
   RowDescriptionMessage,

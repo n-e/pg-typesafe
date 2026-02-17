@@ -1,5 +1,5 @@
 {
-  "name": "pg-nice-types",
+  "name": "pg-typesafe",
   "version": "0.0.1",
   "description": "",
   "license": "GPL-3.0-only",
@@ -12,18 +12,22 @@
     }
   },
   "bin": {
-    "pg-nice-types": "dist/cli.mjs"
+    "pg-typesafe": "dist/cli.mjs"
   },
   "engines": {
     "node": ">=22.0.0"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE.md",
+    "CONTRIBUTING.md"
   ],
   "scripts": {
     "build": "tsdown",
-    "prepublishOnly": "tsdown",
-    "test": "vitest"
+    "prepublishOnly": "npm run check && npm run test -- --no-watch && npm run build",
+    "test": "vitest",
+    "check": "tsc"
   },
   "devDependencies": {
     "@types/node": "^25.2.3",

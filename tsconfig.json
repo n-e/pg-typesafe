@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "nodenext",
+    "module": "preserve",
     "lib": ["esnext"],
     "rewriteRelativeImportExtensions": true,
     "erasableSyntaxOnly": true,
