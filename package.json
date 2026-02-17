@@ -1,9 +1,14 @@
 {
   "name": "pg-typesafe",
   "version": "0.0.1",
-  "description": "",
+  "description": "Strongly typed queries for PostgreSQL and TypeScript",
   "license": "GPL-3.0-only",
-  "author": "",
+  "author": "Nicolas Even <nicolas@even.li>",
+  "homepage": "https://github.com/n-e/pg-typesafe",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/n-e/pg-typesafe.git"
+  },
   "type": "module",
   "exports": {
     ".": {
