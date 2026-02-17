@@ -98,6 +98,7 @@ const readConfig = async () => {
 
     transformParameter: config?.transformParameter ?? defaultTransformParameter,
     transformField: config?.transformField ?? defaultTransformField,
+    ignoreFiles: config.ignoreFiles ?? [],
   };
 };
 
@@ -119,6 +120,13 @@ const queries: { query: string; loc: string }[] = [];
 
 const sourceFiles = project.getSourceFiles();
 sourceFiles.forEach((file) => {
+  const relativePath = relative(".", file.getFilePath());
+  if (
+    relativePath.split("/").some((part) => config.ignoreFiles.includes(part))
+  ) {
+    return;
+  }
+
   const calls = file.getDescendantsOfKind(SyntaxKind.CallExpression);
 
   calls.forEach((call) => {
@@ -137,7 +145,7 @@ sourceFiles.forEach((file) => {
 
       const { line, column } = file.getLineAndColumnAtPos(call.getStart());
 
-      const loc = `${relative(".", file.getFilePath())}:${line}:${column}`;
+      const loc = `${relativePath}:${line}:${column}`;
 
       if (!type.getText().endsWith("TypesafeQueryFn")) {
         msg(

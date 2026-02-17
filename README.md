@@ -86,6 +86,8 @@ export default defineConfig({
 });
 ```
 
+The full list of parameters is available as JSDoc.
+
 ## Recipes
 
 ### Convert BIGINTs to JavaScript bigints
