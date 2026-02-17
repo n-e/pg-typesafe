@@ -19,9 +19,7 @@ const head = `import { type Pool, type PoolClient, type Client, type QueryResult
 
 export type TypesafeQueryFn = <T extends keyof Queries>(
   query: T,
-  ...args: Queries[T]["parameters"] extends unknown[]
-    ? unknown[]
-    : Queries[T]["parameters"] extends []
+  ...args: Queries[T]["parameters"] extends []
       ? []
       : [values: Queries[T]["parameters"]]
 ) => Promise<QueryResultBase & { rows: Queries[T]["fields"][] }>;
@@ -50,7 +48,6 @@ const buildQueryObj = (
     .toArray();
 
   return `export interface Queries {
-  [k: string]: { parameters: unknown[]; fields: unknown };
 ${lines.join("\n")}
 }`;
 };
