@@ -1,0 +1,41 @@
+{
+  "name": "pg-nice-types",
+  "version": "0.0.1",
+  "description": "",
+  "license": "GPL-3.0-only",
+  "author": "",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "bin": {
+    "pg-nice-types": "dist/cli.mjs"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "prepublishOnly": "tsdown",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "@types/pg": "^8.16.0",
+    "publint": "^0.3.17",
+    "tsdown": "0.20.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "pg": "^8.18.0",
+    "pg-protocol": "^1.11.0",
+    "ts-morph": "^27.0.2"
+  }
+}
