@@ -3,8 +3,8 @@
 import assert from "node:assert";
 import { existsSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
-import { relative } from "node:path";
-import { argv } from "node:process";
+import { relative, resolve } from "node:path";
+import { argv, cwd } from "node:process";
 import { inspect, parseArgs } from "node:util";
 import { Client } from "pg";
 import { Project, SyntaxKind } from "ts-morph";
@@ -13,6 +13,7 @@ import {
   defaultTransformField,
   defaultTransformParameter,
 } from "./typeTransform.ts";
+import type { PgTypesafeConfig } from "./index.ts";
 
 const head = `import { type Pool, type PoolClient, type Client, type QueryResultBase } from "pg";
 
@@ -65,18 +66,49 @@ const msg = (
   console.log();
 };
 
-const args = parseArgs({
-  args: argv.slice(2),
-  options: {
-    connectionString: { type: "string" },
-    definitionsFile: { type: "string", default: "src/defs.gen.ts" },
-    tsConfigFile: { type: "string", default: "tsconfig.json" },
-  },
-});
+const readConfig = async () => {
+  const { values: args } = parseArgs({
+    args: argv.slice(2),
+    options: {
+      connectionString: { type: "string" },
+      definitionsFile: { type: "string" },
+      tsConfigFile: { type: "string" },
+      configFile: { type: "string", default: "pg-typesafe.config.ts" },
+    },
+  });
 
-const project = new Project({ tsConfigFilePath: args.values.tsConfigFile });
+  const _config: { default?: PgTypesafeConfig } | null = await import(
+    resolve(cwd(), args.configFile)
+  ).catch((e) => {
+    console.log(`notice: could not read ${args.configFile}`);
+    return null;
+  });
 
-const defFile = args.values.definitionsFile;
+  if (!_config?.default) {
+    console.log(
+      `warning: ${args.configFile} must export the config as default.`,
+    );
+    console.log("  example: export default defineConfig({})");
+  }
+
+  const config = _config?.default ?? {};
+
+  return {
+    connectionString: args.connectionString ?? config?.connectionString,
+    definitionsFile:
+      args.definitionsFile ?? config?.definitionsFile ?? "src/defs.gen.ts",
+    tsConfigFile: args.tsConfigFile ?? config?.tsConfigFile ?? "tsconfig.json",
+
+    transformParameter: config?.transformParameter ?? defaultTransformParameter,
+    transformField: config?.transformField ?? defaultTransformField,
+  };
+};
+
+const config = await readConfig();
+
+const project = new Project({ tsConfigFilePath: config.tsConfigFile });
+
+const defFile = config.definitionsFile;
 
 const hasDef = existsSync(defFile);
 
@@ -148,9 +180,28 @@ sourceFiles.forEach((file) => {
   });
 });
 
-const client = new Client({ connectionString: args.values.connectionString });
+const client = new Client({ connectionString: config.connectionString });
 await client.connect();
 
+const impMap = new Map<string, string[]>();
+const pushImports = (
+  imports:
+    | {
+        name: string;
+        path: string;
+      }[]
+    | undefined,
+) => {
+  (imports ?? []).forEach((imp) => {
+    let items = impMap.get(imp.path);
+    if (!items) {
+      items = [];
+      impMap.set(imp.path, items);
+    }
+
+    items.push(imp.name);
+  });
+};
 const qMap = new Map<
   string,
   { parameters: string[]; fields: { k: string; v: string }[] }
@@ -162,13 +213,19 @@ for (const q of queries) {
     if (analyzed === null) {
       qMap.set(q.query, { parameters: [], fields: [] });
     } else {
-      const parameters = analyzed.parameters.map((p) =>
-        defaultTransformParameter(p),
-      );
-      const fields = analyzed.fields.map((f) => ({
-        k: f.name,
-        v: defaultTransformField(f),
-      }));
+      const parameters = analyzed.parameters.map((p) => {
+        const t = config.transformParameter(p);
+        pushImports(t.imports);
+        return t.type;
+      });
+      const fields = analyzed.fields.map((f) => {
+        const t = config.transformField(f);
+        pushImports(t.imports);
+        return {
+          k: f.name,
+          v: t.type,
+        };
+      });
       qMap.set(q.query, { parameters, fields });
     }
   } catch (error) {
@@ -178,4 +235,13 @@ for (const q of queries) {
 
 await client.end();
 
-await writeFile(defFile, head + "\n" + buildQueryObj(qMap), "utf-8");
+const imports = impMap
+  .entries()
+  .map(([path, names]) => `import type { ${names.join(", ")} } from '${path}';`)
+  .toArray()
+  .join("\n");
+await writeFile(
+  defFile,
+  [imports, head, buildQueryObj(qMap)].join("\n"),
+  "utf-8",
+);

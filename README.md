@@ -106,6 +106,89 @@ The path to the type definitions
 The tsconfig file for the project. pg-typesafe uses this file to find the
 files to analyze
 
+#### `--configFile` (default: `pg-typesafe.config.ts`)
+
+The pg-typesasfe configuration file
+
+## Configuration file
+
+Basic `pg-typesafe.config.ts`:
+
+```ts
+import { defineConfig } from "pg-typesafe";
+
+export default defineConfig({
+  connectionString: "postgres://postgres:example@localhost",
+});
+```
+
+## Recipes
+
+### Convert BIGINTs to JavaScript bigints
+
+By default, `pg` returns BIGINTs as strings, as very large values cannot be represented exactly by the JavaScript number type.
+
+In "newer" node.js versions, the bigint type is supported, let's use it.
+
+On the `pg` side, do the conversion:
+
+```ts
+import { types } from "pg";
+types.setTypeParser(20, (val) => BigInt(val));
+```
+
+On the pg-typesafe side, generate the right types:
+
+```ts
+export default defineConfig({
+  // when a query accepts a BIGINT as a parameter, type it as bigint
+  transformParameter(param) {
+    if (param.type_oid === 20) {
+      return { type: "bigint" };
+    }
+    return defaultTransformParameter(param);
+  },
+  // when a query returns a BIGINT, type it as bigint
+  transformField(field) {
+    if (field.type_oid === 20) {
+      return { type: "bigint" };
+    }
+    return defaultTransformField(field);
+  },
+});
+```
+
+### Type JSONB columns to the right type depending on the context
+
+If your JSONB columns contain that data that conform to a schema, it can be nice to type them to the "right" type.
+
+To do this, we will type the columns as `table_name_column_name`, then define these types in another file.
+
+```ts
+export default defineConfig({
+  transformField(field) {
+    if (field.type_oid === 3802 && field.column) {
+      const c = field.column;
+      const typeName = c.table_name + "_" + c.column_name;
+      return {
+        type: typeName,
+        imports: [{ name: typeName, path: "./jsonb_columns.ts" }],
+      };
+    }
+    return defaultTransformField(field);
+  },
+});
+```
+
+Then, if you have a table `hello` with a JSONB column `data`, you can create a `jsonb_columns.ts` file with the right type:
+
+```ts
+export interface hello_data {
+  foo: string;
+  bar: number;
+}
+```
+
 ## Type propagation
 
 For the types to work properly, the pg-typesafe enhanced types must be used. This usually works automatically, even if you use `pool.connect` to acquire clients.

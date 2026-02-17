@@ -57,25 +57,42 @@ const types: Record<number, { parameter: string; field: string }> = {
   25: { parameter: "string", field: "string" },
 };
 
-export function defaultTransformParameter(
-  param: AnalyzeResult["parameters"][number],
-) {
+export type TransformParameterFn = (parameter: { type_oid: number }) => {
+  type: string;
+  imports?: { name: string; path: string }[];
+};
+
+export type TransformFieldFn = (field: {
+  type_oid: number;
+  name: string;
+  column?: {
+    schemaName: string;
+    tableName: string;
+    columnName: string;
+    nullable: boolean;
+  };
+}) => {
+  type: string;
+  imports?: { name: string; path: string }[];
+};
+
+export const defaultTransformParameter: TransformParameterFn = (param) => {
   const t = types[param.type_oid]?.parameter;
   if (!t) {
     console.log("Unknown type for oid " + param.type_oid);
-    return "unknown";
+    return { type: "unknown" };
   }
-  return t;
-}
+  return { type: t };
+};
 
-export function defaultTransformField(field: AnalyzeResult["fields"][number]) {
+export const defaultTransformField: TransformFieldFn = (field) => {
   const t = types[field.type_oid]?.parameter;
   if (!t) {
     console.log("Unknown type for oid " + field.type_oid);
-    return "unknown";
+    return { type: "unknown" };
   }
 
   if (!field.column || field.column.nullable) {
-    return `${t} | null`;
-  } else return t;
-}
+    return { type: `${t} | null` };
+  } else return { type: t };
+};

@@ -75,3 +75,23 @@ it("keeps the connection usable after an error", async () => {
 
   conn.release();
 });
+
+it.only("works on a query that takes arguments but returns nothing", async () => {
+  const conn = await pool.connect();
+  await conn.query("create temporary table t(f text)");
+
+  const d = new Describer("insert into t(f) values($1)");
+  conn.query(d);
+  const desc = await d.promise;
+
+  expect(desc).toMatchInlineSnapshot(`
+    {
+      "fields": [],
+      "parameterOids": [
+        25,
+      ],
+    }
+  `);
+
+  conn.release();
+});

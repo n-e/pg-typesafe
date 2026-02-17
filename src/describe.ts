@@ -48,9 +48,8 @@ export class Describer implements Submittable {
           this.data.fields = msg.fields;
           break;
         case "noData":
-          cleanup();
-          this.resolve?.(null);
-          return;
+          this.data.fields = [];
+          break;
         case "error":
           cleanup();
           this.reject?.(msg);
