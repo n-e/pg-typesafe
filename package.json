@@ -1,6 +1,6 @@
 {
   "name": "pg-typesafe",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Strongly typed queries for PostgreSQL and TypeScript",
   "license": "GPL-3.0-only",
   "author": "Nicolas Even <nicolas@even.li>",
