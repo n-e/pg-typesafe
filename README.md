@@ -2,7 +2,7 @@
 
 pg-typesafe generates TypeScript types for PostgreSQL queries.
 
-It does so with no runtime dependencies, and zero additional verbosity.
+pg-typesafe does so with no runtime dependencies, and zero additional verbosity.
 
 Here is a query with `pg-typesafe`:
 
@@ -13,7 +13,7 @@ const { rows } = client.query(
 );
 ```
 
-It looks the same as a normal query with `pg`, but it is fully typed:
+This query looks the same as a normal query with `pg`, but is fully typed:
 
 - The parameter is required, and must be a number
 - `rows` has the type `{ id:number; name:string; last_modified: Date }[]`
