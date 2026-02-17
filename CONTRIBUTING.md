@@ -25,3 +25,13 @@ For getting information on OIDs, such as going from their name to their number, 
 ```
 select oid,typname from pg_type;
 ```
+
+## Publishing
+
+```
+check/update CHANGELOG.md
+npm version minor
+npm publish --dry-run
+npm publish
+git push --follow-tags
+```
