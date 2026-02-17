@@ -2,52 +2,21 @@
 
 pg-typesafe generates TypeScript types for PostgreSQL queries.
 
-**Without pg-typesafe:**
+It does so with no runtime dependencies, and zero additional verbosity.
+
+Here is a query with `pg-typesafe`:
 
 ```ts
 const { rows } = client.query(
   "select id, name, last_modified from tbl where id = $1",
+  [42],
 );
 ```
 
-This isn't great:
+It looks the same as a normal query with `pg`, but it is fully typed:
 
-- `rows` has the type `any[]`
-- the argument for `$1` is missing and there are no compile-time errors
-
-You can manually type the query:
-
-```ts
-const { rows } = client.query<
-  {
-    id: string;
-    name: string;
-    last_modified: Date;
-  },
-  [id: string]
->("select id, name, last_modified from tbl where id = $1", ["abc"]);
-```
-
-However:
-
-- It's very verbose
-- It's easy to make mistakes, especially:
-  - Getting the nullability of the field wrong
-  - Getting the deserialization type wrong. For example, with node-pg 8.x, by default, an INTEGER is deserialized into a number, but a BIGINT is kept as a string
-
-**With pg-typesafe:**
-
-```ts
-const { rows } = client.query(
-  "select id, name, last_modified from tbl where id = $1",
-  ["abc"],
-);
-```
-
-This is the same as the first example, however :
-
-- `rows` is correcly typed
-- the parameters array are correclty typed
+- The parameter is required, and must be a number
+- `rows` has the type `{ id:number; name:string; last_modified: Date }[]`
 
 ## Getting Started
 
@@ -83,12 +52,7 @@ npm exec pg-typesafe -- --connectionString postgres://postgres:example@localhost
 
 ## Limitations
 
-I use pg-typesafe successfully in my projects, however some useful features are missing and coming soon:
-
-- watch mode
-- configuring type generation
-- typing queries that are in SQL files
-- ignoring files and silencing notice messages
+pg-typesafe can only type queries where the SQL query is a constant, as dynamic queries cannot be analyzed. You should however, when possible, do so, as it avoids SQL injections and is faster.
 
 ## Command-Line Options
 
@@ -201,10 +165,6 @@ async function fetchFoos(client: TypesafeQuerier) {
   return rows;
 }
 ```
-
-## Runtime dependencies
-
-There are no runtime dependencies, everything is included in `defs.gen.ts`.
 
 ## Alternatives
 
