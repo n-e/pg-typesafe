@@ -14,7 +14,13 @@ updates:
     schedule:
       interval: "weekly"
     groups:
-      minor-patch:
+      dev-minor-patch:
         update-types:
           - minor
           - patch
+        dependency-type: development
+      prod-minor-patch:
+        update-types:
+          - minor
+          - patch
+        dependency-type: production
