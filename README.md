@@ -173,3 +173,5 @@ async function fetchFoos(client: TypesafeQuerier) {
 - [pgtyped](https://pgtyped.dev): pgtyped also generates types for queries, and supports queries in both .ts and .sql files. For queries in .ts files, it is more verbose and exposes its own helpers, while pg-typesafe adds no verbosity on top of `pg`
 
 - [kysely](https://kysely.dev): a type-safe query builder that is close to SQL
+
+- [Zapatos](https://jawj.github.io/zapatos/): A Postgres client for TypeScript that allows you to write SQL-like queries with type safety and autocomplete, including flexible shortcuts for CRUD operations (including powerful lateral joins)
