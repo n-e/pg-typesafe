@@ -1,0 +1,20 @@
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    labels: []
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    labels: []
+    schedule:
+      interval: "weekly"
+    groups:
+      minor-patch:
+        update-types:
+          - minor
+          - patch
