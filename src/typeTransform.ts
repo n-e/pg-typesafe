@@ -20,7 +20,7 @@ const types: Record<number, { parameter: string; field: string }> = {
   651: { parameter: "string[]", field: "string[]" },
   // 718: { parameter: "string[]", field: "string[]" }, // TODO circle
   1000: { parameter: "boolean[]", field: "boolean[]" },
-  1001: { parameter: "string[]", field: "string[]" },
+  1001: { parameter: "Buffer[]", field: "Buffer[]" },
   1005: { parameter: "number[]", field: "number[]" },
   1007: { parameter: "number[]", field: "number[]" },
   1028: { parameter: "number[]", field: "number[]" },
@@ -39,7 +39,7 @@ const types: Record<number, { parameter: string; field: string }> = {
   1182: { parameter: "Date[]", field: "Date[]" },
   1185: { parameter: "Date[]", field: "Date[]" },
   // TODO 1186,1187 : interval, intervalArray
-  17: { parameter: "string", field: "string" }, // bytea
+  17: { parameter: "Buffer", field: "Buffer" }, // bytea
 
   // JSON, JSONB
   114: { parameter: "string", field: "unknown" },
@@ -49,6 +49,7 @@ const types: Record<number, { parameter: string; field: string }> = {
   3807: { parameter: "string[]", field: "unknown[]" },
 
   3907: { parameter: "string[]", field: "string[]" },
+  2950: { parameter: "string", field: "string" },
   2951: { parameter: "string[]", field: "string[]" },
   791: { parameter: "string[]", field: "string[]" },
   1183: { parameter: "string[]", field: "string[]" },
