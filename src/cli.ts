@@ -54,7 +54,7 @@ ${lines.join("\n")}
 
 const msg = (
   loc: string,
-  type: "notice" | "warning",
+  type: "notice" | "warning" | "error",
   line1: string,
   line2?: string,
 ) => {
@@ -99,6 +99,7 @@ const readConfig = async () => {
     transformParameter: config?.transformParameter ?? defaultTransformParameter,
     transformField: config?.transformField ?? defaultTransformField,
     ignoreFiles: config.ignoreFiles ?? [],
+    hardAnalyzeFail: config.hardAnalyzeFail ?? false,
   };
 };
 
@@ -211,6 +212,7 @@ const qMap = new Map<
   string,
   { parameters: string[]; fields: { k: string; v: string }[] }
 >();
+let analyzeFailures = 0;
 for (const q of queries) {
   try {
     const analyzed = await analyzeQuery(client, q.query);
@@ -234,11 +236,24 @@ for (const q of queries) {
       qMap.set(q.query, { parameters, fields });
     }
   } catch (error) {
-    msg(q.loc, "warning", "analyzing this query failed", inspect(error));
+    if (config.hardAnalyzeFail) analyzeFailures++;
+    msg(
+      q.loc,
+      config.hardAnalyzeFail ? "error" : "warning",
+      "analyzing this query failed",
+      inspect(error),
+    );
   }
 }
 
 await client.end();
+
+if (analyzeFailures > 0) {
+  console.log(
+    `error: ${analyzeFailures} ${analyzeFailures === 1 ? "query" : "queries"} could not be analyzed. ${defFile} was not updated.`,
+  );
+  process.exit(1);
+}
 
 const imports = impMap
   .entries()
