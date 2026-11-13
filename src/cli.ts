@@ -118,6 +118,8 @@ if (!hasDef) {
 
 const queries: { query: string; loc: string }[] = [];
 
+const resolvedDefFile = resolve(defFile);
+
 const sourceFiles = project.getSourceFiles();
 sourceFiles.forEach((file) => {
   const relativePath = relative(".", file.getFilePath());
@@ -154,6 +156,19 @@ sourceFiles.forEach((file) => {
           `call of ${propAccess.getExpression().getText()}.name is not of type TypesafeQueryFn`,
           `If this call is a database call, type ${propAccess.getExpression().getText()} as TypesafePool, TypesafeClient or TypesafeQuerier`,
         );
+        return;
+      }
+
+      const declarationFile = type
+        .getAliasSymbol()
+        ?.getDeclarations()[0]
+        ?.getSourceFile()
+        .getFilePath();
+      if (!declarationFile) {
+        msg(loc, "warning", "could not get definition file");
+        return;
+      }
+      if (resolve(declarationFile) !== resolvedDefFile) {
         return;
       }
 
